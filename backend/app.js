@@ -1,22 +1,5 @@
-require("dotenv").config();
+const db=require("./db");
 
-const mysql=require("mysql2");
-
-const db=mysql.createConnection({
-    host:process.env.DB_HOST,
-    user:process.env.DB_USER,
-    password:process.env.DB_PASSWORD,
-    database:process.env.DB_NAME
-}).promise();
-
-
-db.connect((err)=>{
-    if(err){
-        console.error("connection with mysql failed",err.message);
-        return;
-    }
-    console.log("connection with mysql done");
-});
 const express=require("express");
 
 const app=express();
@@ -90,6 +73,263 @@ app.get("/api/users",(req,res)=>{
         }
         res.json(results);
     });
+});
+
+app.get("/api/top-songs", async(req,res)=>{
+    const userId=req.query.user_id;
+    if(!userId){
+        return res.status(400).json({
+            error:"user id is required"
+        });
+    }
+    const sql=`with song_plays as(
+    select
+    users.user_id,
+    users.username,
+    tracks.track_id,
+    tracks.track_name,
+    artists.artist_name,
+    count(*) as total_plays
+    from listening_history
+    join users
+    on listening_history.user_id=users.user_id
+    join tracks
+    on listening_history.track_id=tracks.track_id
+    join artists
+    on tracks.artist_id=artists.artist_id
+    WHERE users.user_id = ?
+    group by
+    users.user_id,
+    users.username,
+    tracks.track_id,
+    tracks.track_name,
+    artists.artist_name
+),
+
+ranked_songs as (
+    select
+    username,
+    track_name,
+    artist_name,
+    total_plays,
+    row_number() over(
+        partition by user_id
+        order by total_plays desc
+    ) as song_rank
+    from song_plays
+)
+
+select
+username,
+track_name,
+artist_name,
+total_plays,
+song_rank
+from ranked_songs
+where song_rank<=3
+order by username, song_rank;`;
+
+try{
+    const [results]=await db.query(sql,[userId]);
+    res.json(results);
+}
+catch(err){
+    console.error(err);
+    res.status(500).json({
+        error:"database query failed"
+    });
+}
+});
+
+app.get("/api/top-artists",async(req,res)=>{
+    
+    const userId=req.query.user_id;
+    if(!userId){
+        return res.status(400).json({
+            error:"user_id is required"
+        });
+    }
+    
+    const sql=`SELECT
+    artists.artist_name,
+    COUNT(*) AS total_plays
+    FROM listening_history
+    JOIN users
+        ON listening_history.user_id = users.user_id
+    JOIN tracks
+        ON listening_history.track_id = tracks.track_id
+    JOIN artists
+        ON tracks.artist_id = artists.artist_id
+    WHERE users.user_id = ?
+    GROUP BY artists.artist_id, artists.artist_name
+    ORDER BY total_plays DESC;`;
+
+    try{
+        const [user]=await db.query(
+        "select user_id from users where user_id=?",[userId]
+    );
+    if(user.length===0){
+        return res.status(404).json({
+            error:"user not found"
+        });
+    }
+        const [results]=await db.query(sql,[userId]);
+        res.json(results);
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({
+            error:"database query fail"
+        });
+    }
+});
+
+
+app.get("/api/listening-hours",async(req,res)=>{
+    const userId=req.query.user_id;
+    if(!userId){
+        return res.status(400).json({
+            error:"user_id is required"
+        });
+    }
+    const sql=`select
+    hour(listening_history.played_at) as listening_hour,
+    count(*) as total_plays
+    from listening_history
+    where listening_history.user_id=?
+    group by hour(listening_history.played_at)
+    order by total_plays desc, listening_hour asc;`;
+    try{
+        const [results]=await db.query(sql,[userId]);
+        res.json(results);
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({
+            error:"data query failed"
+        });
+    }
+});
+
+app.get("/api/monthly-trends",async(req,res)=>{
+    const userId=req.query.user_id;
+    if(!userId){
+        return res.status(400).json({
+            error:"user_id is required"
+        });
+    }
+    const sql=`select
+    year(listening_history.played_at) as year,
+    month(listening_history.played_at) as month,
+    count(*) as total_plays
+    from listening_history
+    where listening_history.user_id=?
+    group by year(listening_history.played_at), month(listening_history.played_at)
+    order by year, month;`
+
+    try{
+        const [results]=await db.query(sql,[userId]);
+        res.json(results);
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({
+            error:"database query fail"
+        });
+    }
+});
+
+app.get("/api/listening-concentration",async(req,res)=>{
+    const userId=req.query.user_id;
+    if(!userId){
+        return res.status(400).json({
+            error:"user id is required"
+        });
+    }
+    const sql =`WITH song_plays AS (
+        SELECT
+            tracks.track_id,
+            tracks.track_name,
+            COUNT(*) AS total_plays
+        FROM listening_history
+        JOIN tracks
+            ON listening_history.track_id = tracks.track_id
+        WHERE listening_history.user_id = ?
+        GROUP BY
+            tracks.track_id,
+            tracks.track_name
+    ),
+
+    ranked_songs AS (
+        SELECT
+            track_name,
+            total_plays,
+            ROW_NUMBER() OVER (
+                ORDER BY total_plays DESC
+            ) AS song_rank
+        FROM song_plays
+    ),
+
+    user_total AS (
+        SELECT
+            COUNT(*) AS user_total_plays
+        FROM listening_history
+        WHERE user_id = ?
+    )
+
+    SELECT
+        ranked_songs.track_name AS top_song,
+        ranked_songs.total_plays AS top_song_plays,
+        user_total.user_total_plays,
+        ROUND(
+            ranked_songs.total_plays * 100.0 / user_total.user_total_plays,2
+        ) AS percent_top_song
+    FROM ranked_songs
+    JOIN user_total
+    WHERE ranked_songs.song_rank = 1;`;
+    try{
+        const [results]=await db.query(sql,[userId,userId]);
+        res.json(results);
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({
+            error:"database query failed"
+        });
+    }
+});
+
+app.get("/api/listening-repetition", async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
+    return res.status(400).json({
+        error: "user_id is required"
+    });
+    }
+    const sql = `SELECT
+        users.username,
+        COUNT(*) AS total_plays,
+        COUNT(DISTINCT listening_history.track_id) AS unique_songs,
+        ROUND(
+            COUNT(*) * 1.0 / COUNT(DISTINCT listening_history.track_id),2
+        ) AS avg_plays
+    FROM listening_history
+    JOIN users
+        ON users.user_id = listening_history.user_id
+    WHERE users.user_id = ?
+    GROUP BY users.username, users.user_id;`;
+    try {
+    const [results] = await db.query(sql, [userId]);
+
+    res.json(results);
+
+} catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+        error: "database query failed"
+    });
+}
 });
 app.listen(3000,() =>{
     console.log("server running on http://localhost:3000")
