@@ -30,15 +30,37 @@ a {
 
 .sidebar {
     width: 240px;
+    flex-shrink: 0;
     min-height: 100vh;
     padding: 28px 20px;
     background: #070b0d;
     border-right: 1px solid #182321;
 }
 
+@media (max-width: 800px) {
+    .sidebar {
+        width: 180px;
+        padding: 24px 14px;
+    }
+
+    .sidebar h1 {
+        font-size: 18px;
+    }
+
+    .sidebar nav a {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .main-content {
+        padding: 24px;
+    }
+}
+
 .sidebar h1 {
     font-size: 21px;
     margin-bottom: 40px;
+    letter-spacing: -0.3px;
 }
 
 
@@ -82,12 +104,16 @@ a {
     border-radius: 10px;
     color: #b8c1be;
     font-size: 15px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
 }
 
 .sidebar nav a:hover {
     background: #101b18;
     color: #f1f5f3;
+    transform: translateX(2px);
 }
 
 .sidebar nav a.active {
@@ -102,6 +128,12 @@ a {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 16px;
     margin-bottom: 20px;
+}
+
+@media (max-width: 1000px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 .stat-card {
@@ -131,10 +163,11 @@ a {
 }
 
 .stat-card h3 {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 600;
-    line-height: 1.1;
-    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ---------- Dashboard Panels ---------- */
@@ -142,7 +175,13 @@ a {
 .dashboard-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 16px;
+    gap: 20px;
+}
+
+@media (max-width: 1000px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .panel {
@@ -278,4 +317,117 @@ a {
     background: #35d07f;
     border-radius: 10px;
     transition: width 0.4s ease;
+}
+
+.song-row {
+    border-bottom: 1px solid #182321;
+}
+
+
+#topSongs {
+    margin-top: 10px;
+}
+
+.song-plays {
+    color: #8f9b97;
+    font-size: 12px;
+}
+
+#userSelect {
+    width: 140px;
+    padding: 10px 12px;
+    border: 1px solid #2d4a3d;
+    border-radius: 10px;
+    background: #0e1416;
+    color: #f1f5f3;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+}
+
+#topSongsChart {
+    max-height: 350px;
+}
+
+
+#topArtistsChart {
+    max-height: 350px;
+}
+
+
+
+#timeOfDayChart {
+    max-height: 280px;
+}
+
+#listeningHoursChart {
+    max-height: 280px;
+}
+.trend-panel {
+    height: 380px;
+}
+
+.trend-panel canvas {
+    max-height: 300px;
+}
+.panel {
+    margin-bottom: 20px;
+}
+#listeningInsights {
+    margin-top: 10px;
+    line-height: 1.8;
+    font-size: 14px;
+}
+
+#listeningInsights {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#listeningInsights p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #b8c1be;
+    font-size: 14px;
+}
+
+#listeningInsights strong {
+    color: #f1f5f3;
+    font-weight: 600;
+    min-width: 155px;
+}
+
+.insight-icon {
+    color: #35d07f;
+    width: 18px;
+    font-size: 17px;
+    text-align: center;
+}  
+
+.insight-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.insight-row strong {
+    color: #f1f5f3;
+    font-weight: 600;
+    min-width: 155px;
+}
+
+.insight-row span:last-child {
+    color: #b8c1be;
+}
+
+.insight-icon {
+    color: #35d07f;
+    width: 18px;
+    font-size: 17px;
+    text-align: center;
 }

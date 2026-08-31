@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,10 +18,10 @@
             <h1>Spotify Analytics</h1>
 
             <nav>
-                <a href="#" class="active">Overview</a>
-                <a href="#">Top Songs</a>
-                <a href="#">Top Artists</a>
-                <a href="#">Listening Patterns</a>
+                <a href="index.html" class="active">Overview</a>
+                <a href="top-songs.html">Top Songs</a>
+                <a href="top-artists.html">Top Artists</a>
+                <a href="listening-patterns.html">Listening Patterns</a>
             </nav>
         </aside>
 
@@ -91,25 +92,25 @@
                 </div>
 
                 <div class="panel">
-    <h3>Listening Repetition</h3>
+                    <h3>Listening Repetition</h3>
 
-    <div id="repetition">
-        <div id="avgPlays">--</div>
-        <p>Average plays per song</p>
-    </div>
-</div>
+                    <div id="repetition">
+                        <div id="avgPlays">--</div>
+                        <p>Average plays per song</p>
+                    </div>
+                </div>
 
                 <div class="panel">
-    <h3>Listening Concentration</h3>
+                    <h3>Listening Concentration</h3>
 
-    <div id="concentration">
-        <div id="concentrationPercent">--%</div>
-        <p id="concentrationText">Top song share</p>
-        <div class="concentration-bar">
-    <div id="concentrationFill"></div>
-</div>
-    </div>
-</div>
+                    <div id="concentration">
+                        <div id="concentrationPercent">--%</div>
+                        <p id="concentrationText">Top song share</p>
+                        <div class="concentration-bar">
+                            <div id="concentrationFill"></div>
+                        </div>
+                    </div>
+                </div>
 
             </section>
 
@@ -120,6 +121,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
+    <script src="common.js"></script>
 
 </body>
+
 </html>

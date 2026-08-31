@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Top Artists - Spotify Analytics</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <aside class="sidebar">
+            <h1>Spotify Analytics</h1>
+
+            <nav>
+                <a href="index.html">Overview</a>
+                <a href="top-songs.html">Top Songs</a>
+                <a href="top-artists.html" class="active">Top Artists</a>
+                <a href="listening-patterns.html">Listening Patterns</a>
+            </nav>
+        </aside>
+
+
+        <main class="main-content">
+
+            <header class="dashboard-header">
+                <div>
+                    <h2>Top Artists</h2>
+                    <p>Your most played artists</p>
+                </div>
+
+                <select id="userSelect">
+                    <option value="">Select user</option>
+                </select>
+            </header>
+
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+                    <p>Total Artists</p>
+                    <h3 id="totalArtists">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Most Played Artist</p>
+                    <h3 id="mostPlayedArtist">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Highest Plays</p>
+                    <h3 id="highestArtistPlays">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Average Plays</p>
+                    <h3 id="averageArtistPlays">--</h3>
+                </div>
+
+            </section>
+
+
+            <section class="panel">
+
+                <h3>Most Played Artists</h3>
+
+                <div id="topArtists">
+                    Select a user to view your top artists.
+                </div>
+
+            </section>
+            <section class="panel">
+
+                <h3>Top 10 Artists by Play Count</h3>
+
+                <canvas id="topArtistsChart"></canvas>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="common.js"></script>
+    <script src="topArtists.js"></script>
+
+</body>
+
+</html>

@@ -1,14 +1,12 @@
 const db = require("./db");
-
+const path = require("path");
 const express = require("express");
 const asyncHandler = require("./asyncHandler");
 const errorHandler = require("./errorHandler");
 const app = express();
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 
-app.get("/", (req, res) => {
-    res.send("spoti-analytics_bckend_running");
-});
 
 
 app.get("/api/test", (req, res) => {
@@ -116,6 +114,40 @@ order by username, song_rank;`;
     res.json(results);
 }));
 
+app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
+
+    const userId = req.query.user_id;
+
+    if (!userId) {
+        return res.status(400).json({
+            error: "user_id is required"
+        });
+    }
+
+    const sql = `
+        SELECT
+            tracks.track_name,
+            artists.artist_name,
+            COUNT(*) AS total_plays
+        FROM listening_history
+        JOIN tracks
+            ON listening_history.track_id = tracks.track_id
+        JOIN artists
+            ON tracks.artist_id = artists.artist_id
+        WHERE listening_history.user_id = ?
+        GROUP BY
+            tracks.track_id,
+            tracks.track_name,
+            artists.artist_id,
+            artists.artist_name
+        ORDER BY total_plays DESC;
+    `;
+
+    const [results] = await db.query(sql, [userId]);
+
+    res.json(results);
+}));
+
 app.get("/api/top-artists", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -169,7 +201,7 @@ app.get("/api/listening-hours", asyncHandler(async (req, res) => {
     from listening_history
     where listening_history.user_id=?
     group by hour(listening_history.played_at)
-    order by total_plays desc, listening_hour asc;`;
+    order by listening_hour asc;`;
 
     const [results] = await db.query(sql, [userId]);
     res.json(results);

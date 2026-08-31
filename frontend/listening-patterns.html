@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Listening Patterns - Spotify Analytics</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <aside class="sidebar">
+            <h1>Spotify Analytics</h1>
+
+            <nav>
+                <a href="index.html">Overview</a>
+                <a href="top-songs.html">Top Songs</a>
+                <a href="top-artists.html">Top Artists</a>
+                <a href="listening-patterns.html" class="active">
+                    Listening Patterns
+                </a>
+            </nav>
+        </aside>
+
+
+        <main class="main-content">
+
+            <header class="dashboard-header">
+                <div>
+                    <h2>Listening Patterns</h2>
+                    <p>Understand how and when you listen</p>
+                </div>
+
+                <select id="userSelect">
+                    <option value="">Select user</option>
+                </select>
+            </header>
+
+
+            <!-- SUMMARY CARDS -->
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+                    <p>Average Plays / Song</p>
+                    <h3 id="avgPlays">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Top Song Share</p>
+                    <h3 id="concentrationPercent">--%</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Peak Listening Time</p>
+                    <h3 id="peakTime">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Most Active Hour</p>
+                    <h3 id="peakHour">--</h3>
+                </div>
+
+            </section>
+
+
+            <!-- MONTHLY TRENDS -->
+
+            <section class="panel trend-panel">
+
+                <h3>Monthly Listening Trends</h3>
+
+                <canvas id="monthlyTrendsChart"></canvas>
+
+            </section>
+
+
+            <!-- TIME OF DAY + HOURLY -->
+
+            <section class="dashboard-grid">
+
+                <div class="panel">
+
+                    <h3>Listening by Time of Day</h3>
+
+                    <canvas id="timeOfDayPatternsChart"></canvas>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h3>Listening by Hour</h3>
+
+                    <canvas id="listeningHoursChart"></canvas>
+
+                </div>
+
+            </section>
+
+
+            <!-- INSIGHTS -->
+
+            <section class="panel">
+
+                <h3>Listening Insights</h3>
+
+                <div id="listeningInsights">
+
+                    <p>
+                        <span class="insight-icon">◷</span>
+                        <strong>Peak listening period</strong>
+                        You listen most during the afternoon.
+                    </p>
+
+                    <p>
+                        <span class="insight-icon">◉</span>
+                        <strong>Most active hour</strong>
+                        Your most active listening hour is 10:00.
+                    </p>
+
+                    <p>
+                        <span class="insight-icon">♫</span>
+                        <strong>Most repeated song</strong>
+                        Loser accounts for 50.00% of your total plays.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="listeningPatterns.js"></script>
+    <script src="common.js"></script>
+
+</body>
+
+</html>
