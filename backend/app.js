@@ -1,31 +1,32 @@
-const db=require("./db");
+const db = require("./db");
 
-const express=require("express");
+const express = require("express");
+const asyncHandler = require("./asyncHandler");
+const errorHandler = require("./errorHandler");
+const app = express();
 
-const app=express();
 
-
-app.get("/",(req,res) => {
+app.get("/", (req, res) => {
     res.send("spoti-analytics_bckend_running");
 });
 
 
-app.get("/api/test",(req,res)=>{
+app.get("/api/test", (req, res) => {
     res.json({
-        message:"API working"
+        message: "API working"
     });
 });
 
 
-app.get("/api/user-summary",async(req,res)=>{
-    const userId=req.query.user_id;
-    if(!userId){
+app.get("/api/user-summary", asyncHandler(async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
         return res.status(400).json({
-            error:"user id required"
+            error: "user_id is required"
         });
     }
 
-    const sql=`SELECT
+    const sql = `SELECT
 users.username,
 count(*) as total_plays,
 count(distinct listening_history.track_id) as total_songs,
@@ -44,45 +45,27 @@ group by
 users.user_id, users.username
 order by total_plays desc;`;
 
-try{
-    const [results]=await db.query(sql,[userId]);
-    if (results.length===0){
-        return res.status(404).json({
-            error:"user not found"
-        });
-    }
+    const [results] = await db.query(sql, [userId]);
+    res.json(results);
+}));
+
+
+app.get("/api/users", asyncHandler(async (req, res) => {
+
+    const [results] = await db.query("SELECT * FROM users");
+
     res.json(results);
 
-}
-catch(err){
-    console.error(err);
-    res.status(500).json({
-        error:"databse query failed"
-    });
-}
-});
+}));
 
-
-app.get("/api/users",(req,res)=>{
-    db.query("select * from users",(err,results)=>{
-        if(err){
-            console.error(err);
-            return res.status(500).json({
-                error:"database query failed"
-            });
-        }
-        res.json(results);
-    });
-});
-
-app.get("/api/top-songs", async(req,res)=>{
-    const userId=req.query.user_id;
-    if(!userId){
+app.get("/api/top-songs", asyncHandler(async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
         return res.status(400).json({
-            error:"user id is required"
+            error: "user_id is required"
         });
     }
-    const sql=`with song_plays as(
+    const sql = `with song_plays as(
     select
     users.user_id,
     users.username,
@@ -129,28 +112,20 @@ from ranked_songs
 where song_rank<=3
 order by username, song_rank;`;
 
-try{
-    const [results]=await db.query(sql,[userId]);
+    const [results] = await db.query(sql, [userId]);
     res.json(results);
-}
-catch(err){
-    console.error(err);
-    res.status(500).json({
-        error:"database query failed"
-    });
-}
-});
+}));
 
-app.get("/api/top-artists",async(req,res)=>{
-    
-    const userId=req.query.user_id;
-    if(!userId){
+app.get("/api/top-artists", asyncHandler(async (req, res) => {
+
+    const userId = req.query.user_id;
+    if (!userId) {
         return res.status(400).json({
-            error:"user_id is required"
+            error: "user_id is required"
         });
     }
-    
-    const sql=`SELECT
+
+    const sql = `SELECT
     artists.artist_name,
     COUNT(*) AS total_plays
     FROM listening_history
@@ -164,61 +139,50 @@ app.get("/api/top-artists",async(req,res)=>{
     GROUP BY artists.artist_id, artists.artist_name
     ORDER BY total_plays DESC;`;
 
-    try{
-        const [user]=await db.query(
-        "select user_id from users where user_id=?",[userId]
+    const [user] = await db.query(
+        "SELECT user_id FROM users WHERE user_id = ?",
+        [userId]
     );
-    if(user.length===0){
+
+    if (user.length === 0) {
         return res.status(404).json({
-            error:"user not found"
+            error: "user not found"
         });
     }
-        const [results]=await db.query(sql,[userId]);
-        res.json(results);
-    }
-    catch(err){
-        console.error(err);
-        res.status(500).json({
-            error:"database query fail"
-        });
-    }
-});
+
+    const [results] = await db.query(sql, [userId]);
+
+    res.json(results);
+}));
 
 
-app.get("/api/listening-hours",async(req,res)=>{
-    const userId=req.query.user_id;
-    if(!userId){
+app.get("/api/listening-hours", asyncHandler(async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
         return res.status(400).json({
-            error:"user_id is required"
+            error: "user_id is required"
         });
     }
-    const sql=`select
+    const sql = `select
     hour(listening_history.played_at) as listening_hour,
     count(*) as total_plays
     from listening_history
     where listening_history.user_id=?
     group by hour(listening_history.played_at)
     order by total_plays desc, listening_hour asc;`;
-    try{
-        const [results]=await db.query(sql,[userId]);
-        res.json(results);
-    }
-    catch(err){
-        console.error(err);
-        res.status(500).json({
-            error:"data query failed"
-        });
-    }
-});
 
-app.get("/api/monthly-trends",async(req,res)=>{
-    const userId=req.query.user_id;
-    if(!userId){
+    const [results] = await db.query(sql, [userId]);
+    res.json(results);
+}));
+
+app.get("/api/monthly-trends", asyncHandler(async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
         return res.status(400).json({
-            error:"user_id is required"
+            error: "user_id is required"
         });
     }
-    const sql=`select
+    const sql = `select
     year(listening_history.played_at) as year,
     month(listening_history.played_at) as month,
     count(*) as total_plays
@@ -227,26 +191,18 @@ app.get("/api/monthly-trends",async(req,res)=>{
     group by year(listening_history.played_at), month(listening_history.played_at)
     order by year, month;`
 
-    try{
-        const [results]=await db.query(sql,[userId]);
-        res.json(results);
-    }
-    catch(err){
-        console.error(err);
-        res.status(500).json({
-            error:"database query fail"
-        });
-    }
-});
+    const [results] = await db.query(sql, [userId]);
+    res.json(results);
+}));
 
-app.get("/api/listening-concentration",async(req,res)=>{
-    const userId=req.query.user_id;
-    if(!userId){
+app.get("/api/listening-concentration", asyncHandler(async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
         return res.status(400).json({
-            error:"user id is required"
+            error: "user id is required"
         });
     }
-    const sql =`WITH song_plays AS (
+    const sql = `WITH song_plays AS (
         SELECT
             tracks.track_id,
             tracks.track_name,
@@ -287,24 +243,16 @@ app.get("/api/listening-concentration",async(req,res)=>{
     FROM ranked_songs
     JOIN user_total
     WHERE ranked_songs.song_rank = 1;`;
-    try{
-        const [results]=await db.query(sql,[userId,userId]);
-        res.json(results);
-    }
-    catch(err){
-        console.error(err);
-        res.status(500).json({
-            error:"database query failed"
-        });
-    }
-});
+    const [results] = await db.query(sql, [userId, userId]);
+    res.json(results);
+}));
 
-app.get("/api/listening-repetition", async (req, res) => {
+app.get("/api/listening-repetition", asyncHandler(async (req, res) => {
     const userId = req.query.user_id;
     if (!userId) {
-    return res.status(400).json({
-        error: "user_id is required"
-    });
+        return res.status(400).json({
+            error: "user_id is required"
+        });
     }
     const sql = `SELECT
         users.username,
@@ -318,19 +266,37 @@ app.get("/api/listening-repetition", async (req, res) => {
         ON users.user_id = listening_history.user_id
     WHERE users.user_id = ?
     GROUP BY users.username, users.user_id;`;
-    try {
     const [results] = await db.query(sql, [userId]);
-
     res.json(results);
+}));
 
-} catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-        error: "database query failed"
-    });
-}
-});
-app.listen(3000,() =>{
+app.get("/api/time-of-day", asyncHandler(async (req, res) => {
+    const userId = req.query.user_id;
+    if (!userId) {
+        return res.status(400).json({
+            error: "user  id is required"
+        });
+    }
+    const sql =
+        `SELECT
+        CASE
+            WHEN HOUR(listening_history.played_at) BETWEEN 5 AND 11
+                THEN 'Morning'
+            WHEN HOUR(listening_history.played_at) BETWEEN 12 AND 16
+                THEN 'Afternoon'
+            WHEN HOUR(listening_history.played_at) BETWEEN 17 AND 20
+                THEN 'Evening'
+            ELSE 'Night'
+        END AS time_of_day,
+        COUNT(*) AS total_plays
+    FROM listening_history
+    WHERE listening_history.user_id = ?
+    GROUP BY time_of_day
+    ORDER BY total_plays DESC, time_of_day ASC;`;
+    const [results] = await db.query(sql, [userId]);
+    res.json(results);
+}));
+app.use(errorHandler);
+app.listen(3000, () => {
     console.log("server running on http://localhost:3000")
 });
