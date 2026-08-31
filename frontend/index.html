@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Spotify Analytics Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <aside class="sidebar">
+            <h1>Spotify Analytics</h1>
+
+            <nav>
+                <a href="#" class="active">Overview</a>
+                <a href="#">Top Songs</a>
+                <a href="#">Top Artists</a>
+                <a href="#">Listening Patterns</a>
+            </nav>
+        </aside>
+
+
+        <main class="main-content">
+
+            <header class="dashboard-header">
+                <div>
+                    <h2>Welcome back!</h2>
+                    <p>Your personal listening overview</p>
+                </div>
+
+                <select id="userSelect">
+                    <option value="">Select user</option>
+                </select>
+            </header>
+
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+                    <p>Total Plays</p>
+                    <h3 id="totalPlays">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Unique Songs</p>
+                    <h3 id="uniqueSongs">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Unique Artists</p>
+                    <h3 id="uniqueArtists">--</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Top Song</p>
+                    <h3 id="topSong">--</h3>
+                </div>
+
+            </section>
+
+
+            <section class="dashboard-grid">
+
+                <div class="panel large-panel">
+                    <h3>Listening Over Time</h3>
+                    <canvas id="listeningTrendChart"></canvas>
+                </div>
+
+                <div class="panel">
+                    <h3>Listening by Time of Day</h3>
+                    <canvas id="timeOfDayChart"></canvas>
+                </div>
+
+                <div class="panel">
+                    <h3>Top Songs</h3>
+                    <div id="topSongs">
+                        Data coming here
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Top Artists</h3>
+                    <div id="topArtists">
+                        Data coming here
+                    </div>
+                </div>
+
+                <div class="panel">
+    <h3>Listening Repetition</h3>
+
+    <div id="repetition">
+        <div id="avgPlays">--</div>
+        <p>Average plays per song</p>
+    </div>
+</div>
+
+                <div class="panel">
+    <h3>Listening Concentration</h3>
+
+    <div id="concentration">
+        <div id="concentrationPercent">--%</div>
+        <p id="concentrationText">Top song share</p>
+        <div class="concentration-bar">
+    <div id="concentrationFill"></div>
+</div>
+    </div>
+</div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
