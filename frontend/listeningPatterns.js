@@ -18,8 +18,12 @@ window.addEventListener("userSelected", async (event) => {
         `/api/monthly-trends?user_id=${userId}`
     );
 
-    const monthlyTrends = await trendsResponse.json();
+    if (!trendsResponse.ok) {
+        console.error("Failed to load monthly trends");
+        return;
+    }
 
+    const monthlyTrends = await trendsResponse.json();
     const trendsCanvas =
         document.getElementById("monthlyTrendsChart");
 
@@ -107,6 +111,11 @@ window.addEventListener("userSelected", async (event) => {
     const timeResponse = await fetch(
         `/api/time-of-day?user_id=${userId}`
     );
+
+    if (!timeResponse.ok) {
+        console.error("Failed to load time of day");
+        return;
+    }
 
     const timeOfDay = await timeResponse.json();
     if (timeOfDay.length > 0) {
@@ -199,6 +208,11 @@ window.addEventListener("userSelected", async (event) => {
     const hoursResponse = await fetch(
         `/api/listening-hours?user_id=${userId}`
     );
+
+    if (!hoursResponse.ok) {
+        console.error("Failed to load listening hours");
+        return;
+    }
 
     const listeningHours = await hoursResponse.json();
     if (listeningHours.length > 0) {
@@ -294,6 +308,11 @@ window.addEventListener("userSelected", async (event) => {
         `/api/listening-repetition?user_id=${userId}`
     );
 
+    if (!repetitionResponse.ok) {
+        console.error("Failed to load listening repetition");
+        return;
+    }
+
     const repetition = await repetitionResponse.json();
 
     if (repetition.length > 0) {
@@ -303,6 +322,11 @@ window.addEventListener("userSelected", async (event) => {
     const concentrationResponse = await fetch(
         `/api/listening-concentration?user_id=${userId}`
     );
+
+    if (!concentrationResponse.ok) {
+        console.error("Failed to load listening concentration");
+        return;
+    }
 
     const concentration = await concentrationResponse.json();
 

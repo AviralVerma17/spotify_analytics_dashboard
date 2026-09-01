@@ -13,7 +13,17 @@ window.addEventListener("userSelected", async (event) => {
         `http://localhost:3000/api/user-summary?user_id=${userId}`
     );
 
+    if (!response.ok) {
+        throw new Error("Failed to load user summary");
+    }
+
     const data = await response.json();
+
+    if (data.length === 0) {
+        console.log("No data found for this user.");
+        return;
+    }
+
     const user = data[0];
 
     document.getElementById("totalPlays").textContent = user.total_plays;
@@ -23,6 +33,11 @@ window.addEventListener("userSelected", async (event) => {
     const topSongsResponse = await fetch(
         `http://localhost:3000/api/top-songs?user_id=${userId}`
     );
+
+    if (!topSongsResponse.ok) {
+        console.error("Failed to load top songs");
+        return;
+    }
 
     const topSongs = await topSongsResponse.json();
 
@@ -46,7 +61,9 @@ window.addEventListener("userSelected", async (event) => {
             <span>${song.artist_name}</span>
         </div>
 
-        <span class="song-plays">${song.total_plays} plays</span>
+        <span class="song-plays">
+    ${song.total_plays} ${Number(song.total_plays) === 1 ? "play" : "plays"}
+</span>
     `;
 
         topSongsContainer.appendChild(songElement);
@@ -54,6 +71,11 @@ window.addEventListener("userSelected", async (event) => {
     const topArtistsResponse = await fetch(
         `http://localhost:3000/api/top-artists?user_id=${userId}`
     );
+
+    if (!topArtistsResponse.ok) {
+        console.error("Failed to load top artists");
+        return;
+    }
 
     const topArtists = await topArtistsResponse.json();
 
@@ -71,7 +93,7 @@ window.addEventListener("userSelected", async (event) => {
 
         <div class="artist-info">
             <strong>${artist.artist_name}</strong>
-            <span>${artist.total_plays} plays</span>
+            <span>${artist.total_plays} ${Number(artist.total_plays) === 1 ? "play" : "plays"}</span>
         </div>
     `;
 
@@ -80,6 +102,11 @@ window.addEventListener("userSelected", async (event) => {
     const trendsResponse = await fetch(
         `http://localhost:3000/api/monthly-trends?user_id=${userId}`
     );
+
+    if (!trendsResponse.ok) {
+        console.error("Failed to load monthly trends");
+        return;
+    }
 
     const monthlyTrends = await trendsResponse.json();
     const chartCanvas = document.getElementById("listeningTrendChart");
@@ -159,8 +186,12 @@ window.addEventListener("userSelected", async (event) => {
         `http://localhost:3000/api/time-of-day?user_id=${userId}`
     );
 
-    const timeOfDay = await timeResponse.json();
+    if (!timeResponse.ok) {
+        console.error("Failed to load time of day");
+        return;
+    }
 
+    const timeOfDay = await timeResponse.json();
     const timeCanvas = document.getElementById("timeOfDayChart");
 
     if (timeOfDayChart) {
@@ -236,7 +267,17 @@ window.addEventListener("userSelected", async (event) => {
         `http://localhost:3000/api/listening-repetition?user_id=${userId}`
     );
 
+    if (!repetitionResponse.ok) {
+        console.error("Failed to load listening repetition");
+        return;
+    }
+
     const repetition = await repetitionResponse.json();
+
+    if (repetition.length === 0) {
+        console.log("No repetition data found");
+        return;
+    }
 
     const repetitionData = repetition[0];
 
@@ -247,7 +288,17 @@ window.addEventListener("userSelected", async (event) => {
         `http://localhost:3000/api/listening-concentration?user_id=${userId}`
     );
 
+    if (!concentrationResponse.ok) {
+        console.error("Failed to load listening concentration");
+        return;
+    }
+
     const concentration = await concentrationResponse.json();
+
+    if (concentration.length === 0) {
+        console.log("No concentration data found");
+        return;
+    }
 
     const concentrationData = concentration[0];
 

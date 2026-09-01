@@ -17,6 +17,13 @@ window.addEventListener("userSelected", async (event) => {
         `/api/top-artists?user_id=${userId}`
     );
 
+    if (!response.ok) {
+        console.error("Failed to load top artists");
+        topArtistsContainer.innerHTML =
+            "Unable to load top artists. Please try again.";
+        return;
+    }
+
     const topArtists = await response.json();
 
     document.getElementById("totalArtists").textContent =

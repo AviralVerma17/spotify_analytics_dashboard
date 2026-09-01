@@ -6,7 +6,7 @@ let topSongsChart = null;
 window.addEventListener("userSelected", async (event) => {
 
     const userId = event.detail;
-    
+
     if (!userId) {
         topSongsContainer.innerHTML =
             "Select a user to view your top songs.";
@@ -16,6 +16,13 @@ window.addEventListener("userSelected", async (event) => {
     const response = await fetch(
         `/api/all-top-songs?user_id=${userId}`
     );
+
+    if (!response.ok) {
+        console.error("Failed to load top songs");
+        topSongsContainer.innerHTML =
+            "Unable to load top songs. Please try again.";
+        return;
+    }
 
     const topSongs = await response.json();
     document.getElementById("totalSongs").textContent =

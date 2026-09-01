@@ -106,8 +106,8 @@ a {
     font-size: 15px;
 
     transition: background-color 0.2s ease,
-                color 0.2s ease,
-                transform 0.2s ease;
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .sidebar nav a:hover {
@@ -199,7 +199,7 @@ a {
 }
 
 .large-panel {
-    min-height: 280px;
+    min-height: 360px;
 }
 
 /* ---------- User Selector ---------- */
@@ -356,13 +356,8 @@ a {
 
 
 
-#timeOfDayChart {
-    max-height: 280px;
-}
 
-#listeningHoursChart {
-    max-height: 280px;
-}
+
 .trend-panel {
     height: 380px;
 }
@@ -370,9 +365,11 @@ a {
 .trend-panel canvas {
     max-height: 300px;
 }
+
 .panel {
     margin-bottom: 20px;
 }
+
 #listeningInsights {
     margin-top: 10px;
     line-height: 1.8;
@@ -405,7 +402,7 @@ a {
     width: 18px;
     font-size: 17px;
     text-align: center;
-}  
+}
 
 .insight-row {
     display: flex;
@@ -430,4 +427,113 @@ a {
     width: 18px;
     font-size: 17px;
     text-align: center;
+}
+
+/* Overview chart sizing */
+
+#listeningTrendChart {
+    max-height: 300px;
+}
+
+#timeOfDayChart {
+    max-height: 260px;
+}
+
+#topSongs,
+#topArtists {
+    margin-top: 8px;
+}
+
+.song-row,
+.artist-row {
+    border-bottom: 1px solid #182321;
+}
+
+.song-row:last-child,
+.artist-row:last-child {
+    border-bottom: none;
+}
+
+
+
+/* Compact insight cards */
+
+#repetition,
+#concentration {
+    margin-top: 8px;
+}
+
+#repetition {
+    padding: 8px 0;
+}
+
+#repetition #avgPlays {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+#concentrationPercent {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+#concentrationText {
+    color: #b8c1be;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+
+/* Overview panel sizing */
+
+.dashboard-grid {
+    align-items: start;
+}
+
+.dashboard-grid .panel {
+    min-height: 0;
+}
+
+/* Chart panels */
+.dashboard-grid .large-panel {
+    height: 400px;
+}
+
+
+
+/* ---------- Listening Patterns Chart Row ---------- */
+
+.patterns-chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+.patterns-chart-row .panel {
+    min-height: 0;
+    min-width: 0;
+    height: 425px;
+}
+
+/* Charts */
+
+#timeOfDayPatternsChart,
+#listeningHoursChart {
+    width: 100% !important;
+    height: 320px !important;
+    max-height: 320px !important;
+}
+
+/* Prevent horizontal overflow */
+
+.main-content {
+    min-width: 0;
+}
+
+.dashboard-grid {
+    min-width: 0;
 }
