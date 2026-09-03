@@ -10,7 +10,7 @@ window.addEventListener("userSelected", async (event) => {
     }
 
     const response = await fetch(
-        `http://localhost:3000/api/user-summary?user_id=${userId}`
+        `/api/user-summary?user_id=${userId}`
     );
 
     if (!response.ok) {
@@ -31,7 +31,7 @@ window.addEventListener("userSelected", async (event) => {
     document.getElementById("uniqueArtists").textContent = user.total_artists;
 
     const topSongsResponse = await fetch(
-        `http://localhost:3000/api/top-songs?user_id=${userId}`
+        `/api/top-songs?user_id=${userId}`
     );
 
     if (!topSongsResponse.ok) {
@@ -69,7 +69,7 @@ window.addEventListener("userSelected", async (event) => {
         topSongsContainer.appendChild(songElement);
     });
     const topArtistsResponse = await fetch(
-        `http://localhost:3000/api/top-artists?user_id=${userId}`
+        `/api/top-artists?user_id=${userId}`
     );
 
     if (!topArtistsResponse.ok) {
@@ -100,7 +100,7 @@ window.addEventListener("userSelected", async (event) => {
         topArtistsContainer.appendChild(artistElement);
     });
     const trendsResponse = await fetch(
-        `http://localhost:3000/api/monthly-trends?user_id=${userId}`
+        `/api/monthly-trends?user_id=${userId}`
     );
 
     if (!trendsResponse.ok) {
@@ -183,7 +183,7 @@ window.addEventListener("userSelected", async (event) => {
         }
     });
     const timeResponse = await fetch(
-        `http://localhost:3000/api/time-of-day?user_id=${userId}`
+        `/api/time-of-day?user_id=${userId}`
     );
 
     if (!timeResponse.ok) {
@@ -264,7 +264,7 @@ window.addEventListener("userSelected", async (event) => {
         }
     });
     const repetitionResponse = await fetch(
-        `http://localhost:3000/api/listening-repetition?user_id=${userId}`
+        `/api/listening-repetition?user_id=${userId}`
     );
 
     if (!repetitionResponse.ok) {
@@ -285,7 +285,7 @@ window.addEventListener("userSelected", async (event) => {
         repetitionData.avg_plays;
 
     const concentrationResponse = await fetch(
-        `http://localhost:3000/api/listening-concentration?user_id=${userId}`
+        `/api/listening-concentration?user_id=${userId}`
     );
 
     if (!concentrationResponse.ok) {

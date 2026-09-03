@@ -537,3 +537,25 @@ a {
 .dashboard-grid {
     min-width: 0;
 }
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#spotifyLoginButton {
+    padding: 10px 18px;
+    border: 1px solid #35d07f;
+    border-radius: 8px;
+    background: #35d07f;
+    color: #090d0f;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#spotifyLoginButton:hover {
+    background: #2bb86d;
+    border-color: #2bb86d;
+}

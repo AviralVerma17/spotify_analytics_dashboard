@@ -6,7 +6,11 @@ const errorHandler = require("./errorHandler");
 const app = express();
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-
+app.get("/auth/callback", (req, res) => {
+    res.sendFile(
+        path.join(__dirname, "../frontend/callback.html")
+    );
+});
 
 
 app.get("/api/test", (req, res) => {
@@ -54,6 +58,31 @@ app.get("/api/users", asyncHandler(async (req, res) => {
 
     res.json(results);
 
+}));
+app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
+
+    const spotifyId = req.query.spotify_id;
+
+    if (!spotifyId) {
+        return res.status(400).json({
+            error: "spotify_id is required"
+        });
+    }
+
+    const [results] = await db.query(
+        `SELECT user_id, username
+         FROM users
+         WHERE spotify_account_id = ?`,
+        [spotifyId]
+    );
+
+    if (results.length === 0) {
+        return res.status(404).json({
+            error: "Spotify account not linked"
+        });
+    }
+
+    res.json(results[0]);
 }));
 
 app.get("/api/top-songs", asyncHandler(async (req, res) => {

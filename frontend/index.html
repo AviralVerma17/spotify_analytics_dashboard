@@ -34,9 +34,17 @@
                     <p>Your personal listening overview</p>
                 </div>
 
-                <select id="userSelect">
-                    <option value="">Select user</option>
-                </select>
+                <div class="header-actions">
+
+                    <button id="spotifyLoginButton">
+                        Login with Spotify
+                    </button>
+
+                    <select id="userSelect">
+                        <option value="">Select user</option>
+                    </select>
+
+                </div>
             </header>
 
 
@@ -120,8 +128,10 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="spotifyApi.js"></script>
     <script src="script.js"></script>
     <script src="common.js"></script>
+    <script src="spotifyAuth.js"></script>
 
 </body>
 

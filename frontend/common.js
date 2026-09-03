@@ -1,56 +1,56 @@
 const userSelect = document.getElementById("userSelect");
 
 
-async function loadUsers() {
+async function loadSpotifyUser() {
 
-    const response = await fetch("http://localhost:3000/api/users");
-    const users = await response.json();
+    try {
 
-    users.forEach(user => {
+        const user =
+            await getLinkedSqlUser();
 
-        const option = document.createElement("option");
+        console.log(
+            "Logged in SQL user:",
+            user
+        );
+
+
+        userSelect.innerHTML = "";
+
+
+        const option =
+            document.createElement("option");
 
         option.value = user.user_id;
         option.textContent = user.username;
 
         userSelect.appendChild(option);
-    });
 
 
-    const savedUser = localStorage.getItem("selectedUser");
+        userSelect.value =
+            user.user_id;
 
-    if (savedUser) {
-        userSelect.value = savedUser;
+
+        localStorage.setItem(
+            "selectedUser",
+            user.user_id
+        );
+
 
         window.dispatchEvent(
             new CustomEvent("userSelected", {
-                detail: savedUser
+                detail: user.user_id
             })
         );
+
+    } catch (error) {
+
+        console.error(
+            "Could not load Spotify user:",
+            error
+        );
+
     }
 }
 
 
-userSelect.addEventListener("change", () => {
-
-    const userId = userSelect.value;
-
-    if (userId) {
-
-        localStorage.setItem("selectedUser", userId);
-
-        window.dispatchEvent(
-            new CustomEvent("userSelected", {
-                detail: userId
-            })
-        );
-
-    } else {
-
-        localStorage.removeItem("selectedUser");
-    }
-
-});
-
-
-loadUsers();
+loadSpotifyUser();
