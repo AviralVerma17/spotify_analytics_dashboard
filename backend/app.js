@@ -4,6 +4,10 @@ const express = require("express");
 const asyncHandler = require("./asyncHandler");
 const errorHandler = require("./errorHandler");
 const app = express();
+
+app.use(express.json({limit:"1mb"}));
+
+
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.get("/auth/callback", (req, res) => {
@@ -357,6 +361,124 @@ app.get("/api/time-of-day", asyncHandler(async (req, res) => {
     const [results] = await db.query(sql, [userId]);
     res.json(results);
 }));
+
+app.post("/api/sync-recently-played", asyncHandler(async (req, res) => {
+
+    const { user_id, items } = req.body;
+
+    if (!user_id || !Array.isArray(items)) {
+        return res.status(400).json({
+            error: "user_id and items are required"
+        });
+    }
+
+    const connection = db;
+
+    try {
+
+        await connection.beginTransaction();
+
+        let inserted = 0;
+        let skipped = 0;
+
+        for (const item of items) {
+
+            const track = item.track;
+            const playedAt = item.played_at;
+
+            if (!track || !playedAt || !track.id) {
+                skipped++;
+                continue;
+            }
+
+            const artist = track.artists?.[0];
+
+            if (!artist || !artist.id) {
+                skipped++;
+                continue;
+            }
+
+            // Insert artist if it does not already exist
+            await connection.query(
+                `INSERT INTO artists
+                    (artist_name, spotify_artist_id)
+                 VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE
+                    artist_id = LAST_INSERT_ID(artist_id)`,
+                [
+                    artist.name,
+                    artist.id
+                ]
+            );
+
+            const [artistRows] = await connection.query(
+                `SELECT artist_id
+                 FROM artists
+                 WHERE spotify_artist_id = ?`,
+                [artist.id]
+            );
+
+            const artistId = artistRows[0].artist_id;
+
+            // Insert track if it does not already exist
+            await connection.query(
+                `INSERT INTO tracks
+                    (track_name, artist_id, spotify_track_id)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE
+                    track_id = LAST_INSERT_ID(track_id),
+                    artist_id = VALUES(artist_id)`,
+                [
+                    track.name,
+                    artistId,
+                    track.id
+                ]
+            );
+
+            const [trackRows] = await connection.query(
+                `SELECT track_id
+                 FROM tracks
+                 WHERE spotify_track_id = ?`,
+                [track.id]
+            );
+
+            const trackId = trackRows[0].track_id;
+
+            // Insert listening event
+            const [result] = await connection.query(
+                `INSERT IGNORE INTO listening_history
+                    (user_id, track_id, played_at)
+                 VALUES (?, ?, ?)`,
+                [
+                    user_id,
+                    trackId,
+                    new Date(playedAt)
+                ]
+            );
+
+            if (result.affectedRows === 1) {
+                inserted++;
+            } else {
+                skipped++;
+            }
+        }
+
+        await connection.commit();
+
+        res.json({
+            message: "Recently played data synced",
+            inserted,
+            skipped
+        });
+
+    } catch (error) {
+
+        await connection.rollback();
+        throw error;
+
+    }
+}));
+
 app.use(errorHandler);
 app.listen(3000, () => {
     console.log("server running on http://localhost:3000")

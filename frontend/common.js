@@ -13,6 +13,7 @@ async function loadSpotifyUser() {
             user
         );
 
+        await syncRecentlyPlayed(user.user_id);
 
         userSelect.innerHTML = "";
 
