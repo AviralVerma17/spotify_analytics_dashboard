@@ -362,6 +362,29 @@ app.get("/api/time-of-day", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+app.get("/api/last-listening", asyncHandler(async (req, res) => {
+
+    const userId = req.query.user_id;
+
+    if (!userId) {
+        return res.status(400).json({
+            error: "user_id is required"
+        });
+    }
+
+    const [results] = await db.query(
+        `SELECT MAX(played_at) AS last_played_at
+         FROM listening_history
+         WHERE user_id = ?`,
+        [userId]
+    );
+
+    res.json({
+        last_played_at: results[0].last_played_at
+    });
+
+}));
+
 app.post("/api/sync-recently-played", asyncHandler(async (req, res) => {
 
     const { user_id, items } = req.body;

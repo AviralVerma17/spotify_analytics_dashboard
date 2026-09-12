@@ -71,20 +71,71 @@ async function getLinkedSqlUser() {
 
     return response.json();
 }
-async function getRecentlyPlayed() {
+async function getRecentlyPlayed(userId) {
 
-    const data =
-        await spotifyFetch(
-            "/me/player/recently-played?limit=50"
+    const response =
+        await fetch(
+            `/api/last-listening?user_id=${encodeURIComponent(userId)}`
         );
 
-    return data;
+    if (!response.ok) {
+        throw new Error(
+            "Could not get last listening timestamp"
+        );
+    }
+
+    const lastListening =
+        await response.json();
+
+    let endpoint =
+        "/me/player/recently-played?limit=50";
+
+    if (lastListening.last_played_at) {
+
+        const after =
+            new Date(
+                lastListening.last_played_at
+            ).getTime();
+
+        endpoint =
+            `/me/player/recently-played?limit=50&after=${after}`;
+    }
+
+    let allItems = [];
+
+    while (endpoint) {
+
+        const data =
+            await spotifyFetch(
+                endpoint.replace(
+                    "https://api.spotify.com/v1",
+                    ""
+                )
+            );
+
+        allItems =
+            allItems.concat(data.items);
+
+        if (data.next) {
+
+            endpoint =
+                data.next;
+
+        } else {
+
+            endpoint = null;
+        }
+    }
+
+    return {
+        items: allItems
+    };
 }
 
 async function syncRecentlyPlayed(userId) {
 
     const data =
-        await getRecentlyPlayed();
+    await getRecentlyPlayed(userId);
 
     const response =
         await fetch(

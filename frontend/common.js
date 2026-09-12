@@ -8,13 +8,19 @@ async function loadSpotifyUser() {
         const user =
             await getLinkedSqlUser();
 
-        console.log(
-            "Logged in SQL user:",
-            user
-        );
+        
 
-        await syncRecentlyPlayed(user.user_id);
+        const syncStatus =
+            document.getElementById("syncStatus");
 
+        syncStatus.textContent =
+            "⟳ Syncing Spotify data...";
+
+        const syncResult =
+            await syncRecentlyPlayed(user.user_id);
+
+        syncStatus.textContent =
+            `✓ Spotify synced · ${syncResult.inserted} new plays`;
         userSelect.innerHTML = "";
 
 
@@ -45,6 +51,14 @@ async function loadSpotifyUser() {
 
     } catch (error) {
 
+        const syncStatus =
+            document.getElementById("syncStatus");
+
+        if (syncStatus) {
+            syncStatus.textContent =
+                "⚠ Spotify sync failed";
+        }
+
         console.error(
             "Could not load Spotify user:",
             error
@@ -52,6 +66,5 @@ async function loadSpotifyUser() {
 
     }
 }
-
 
 loadSpotifyUser();
