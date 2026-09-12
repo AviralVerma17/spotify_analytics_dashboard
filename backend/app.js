@@ -147,6 +147,21 @@ order by username, song_rank;`;
     res.json(results);
 }));
 
+app.get("/api/db-check", asyncHandler(async (req, res) => {
+
+    const [results] = await db.query(`
+        SELECT
+            DATABASE() AS database_name,
+            @@hostname AS hostname,
+            @@port AS port,
+            COUNT(*) AS listening_rows
+        FROM listening_history
+        WHERE user_id = 1
+    `);
+
+    res.json(results[0]);
+}));
+
 app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
