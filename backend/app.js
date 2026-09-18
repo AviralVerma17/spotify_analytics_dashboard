@@ -66,6 +66,7 @@ app.get("/api/users", asyncHandler(async (req, res) => {
 app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
 
     const spotifyId = req.query.spotify_id;
+    const username = req.query.username;
 
     if (!spotifyId) {
         return res.status(400).json({
@@ -80,13 +81,31 @@ app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
         [spotifyId]
     );
 
-    if (results.length === 0) {
-        return res.status(404).json({
-            error: "Spotify account not linked"
+    if (results.length > 0) {
+        return res.json(results[0]);
+    }
+
+    if (!username) {
+        return res.status(400).json({
+            error: "username is required for new Spotify users"
         });
     }
 
-    res.json(results[0]);
+    await db.query(
+        `INSERT INTO users
+            (username, spotify_account_id)
+         VALUES (?, ?)`,
+        [username, spotifyId]
+    );
+
+    const [newUser] = await db.query(
+        `SELECT user_id, username
+         FROM users
+         WHERE spotify_account_id = ?`,
+        [spotifyId]
+    );
+
+    res.json(newUser[0]);
 }));
 
 app.get("/api/top-songs", asyncHandler(async (req, res) => {

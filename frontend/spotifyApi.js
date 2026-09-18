@@ -59,13 +59,13 @@ async function getLinkedSqlUser() {
 
     const response =
         await fetch(
-            `/api/user-by-spotify?spotify_id=${encodeURIComponent(profile.account_id)}`
+            `/api/user-by-spotify?spotify_id=${encodeURIComponent(profile.account_id)}&username=${encodeURIComponent(profile.display_name)}`
         );
 
     if (!response.ok) {
 
         throw new Error(
-            "Could not find linked SQL user"
+            "Could not find or create SQL user"
         );
     }
 

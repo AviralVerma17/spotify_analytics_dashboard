@@ -1,4 +1,4 @@
-const userSelect = document.getElementById("userSelect");
+let currentUserId = null;
 
 
 async function loadSpotifyUser() {
@@ -8,44 +8,39 @@ async function loadSpotifyUser() {
         const user =
             await getLinkedSqlUser();
 
-        
+        currentUserId =
+            user.user_id;
 
         const syncStatus =
             document.getElementById("syncStatus");
 
-        syncStatus.textContent =
-            "⟳ Syncing Spotify data...";
+        if (syncStatus) {
+
+            syncStatus.textContent =
+                "⟳ Syncing Spotify data...";
+
+        }
 
         const syncResult =
-            await syncRecentlyPlayed(user.user_id);
+            await syncRecentlyPlayed(
+                currentUserId
+            );
 
-        syncStatus.textContent =
-            `✓ Spotify synced · ${syncResult.inserted} new plays`;
-        userSelect.innerHTML = "";
+        if (syncStatus) {
 
+            syncStatus.textContent =
+                `✓ Spotify synced · ${syncResult.inserted} new plays`;
 
-        const option =
-            document.createElement("option");
-
-        option.value = user.user_id;
-        option.textContent = user.username;
-
-        userSelect.appendChild(option);
-
-
-        userSelect.value =
-            user.user_id;
-
+        }
 
         localStorage.setItem(
             "selectedUser",
-            user.user_id
+            currentUserId
         );
-
 
         window.dispatchEvent(
             new CustomEvent("userSelected", {
-                detail: user.user_id
+                detail: currentUserId
             })
         );
 
@@ -55,8 +50,10 @@ async function loadSpotifyUser() {
             document.getElementById("syncStatus");
 
         if (syncStatus) {
+
             syncStatus.textContent =
                 "⚠ Spotify sync failed";
+
         }
 
         console.error(
@@ -66,5 +63,6 @@ async function loadSpotifyUser() {
 
     }
 }
+
 
 loadSpotifyUser();
