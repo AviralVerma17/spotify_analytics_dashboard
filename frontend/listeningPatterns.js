@@ -13,17 +13,19 @@ window.addEventListener("userSelected", async (event) => {
         return;
     }
 
-    console.log("Listening Patterns loading for user:", userId);
+    const timeRange =
+        localStorage.getItem("timeRange") || "all";
+
     const trendsResponse = await fetch(
-        `/api/monthly-trends?user_id=${userId}`
-    );
+    `/api/monthly-trends?user_id=${userId}&time_range=${timeRange}`
+);
 
-    if (!trendsResponse.ok) {
-        console.error("Failed to load monthly trends");
-        return;
-    }
+if (!trendsResponse.ok) {
+    console.error("Failed to load monthly trends");
+    return;
+}
 
-    const monthlyTrends = await trendsResponse.json();
+const monthlyTrends = await trendsResponse.json();
     const trendsCanvas =
         document.getElementById("monthlyTrendsChart");
 
@@ -109,7 +111,7 @@ window.addEventListener("userSelected", async (event) => {
         }
     });
     const timeResponse = await fetch(
-        `/api/time-of-day?user_id=${userId}`
+        `/api/time-of-day?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!timeResponse.ok) {
@@ -206,8 +208,8 @@ window.addEventListener("userSelected", async (event) => {
         }
     });
     const hoursResponse = await fetch(
-        `/api/listening-hours?user_id=${userId}`
-    );
+    `/api/listening-hours?user_id=${userId}&time_range=${timeRange}`
+);
 
     if (!hoursResponse.ok) {
         console.error("Failed to load listening hours");
@@ -305,8 +307,8 @@ window.addEventListener("userSelected", async (event) => {
         }
     });
     const repetitionResponse = await fetch(
-        `/api/listening-repetition?user_id=${userId}`
-    );
+    `/api/listening-repetition?user_id=${userId}&time_range=${timeRange}`
+);
 
     if (!repetitionResponse.ok) {
         console.error("Failed to load listening repetition");
@@ -320,8 +322,8 @@ window.addEventListener("userSelected", async (event) => {
             Number(repetition[0].avg_plays).toFixed(2);
     }
     const concentrationResponse = await fetch(
-        `/api/listening-concentration?user_id=${userId}`
-    );
+    `/api/listening-concentration?user_id=${userId}&time_range=${timeRange}`
+);
 
     if (!concentrationResponse.ok) {
         console.error("Failed to load listening concentration");

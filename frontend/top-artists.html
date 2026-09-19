@@ -31,12 +31,17 @@
             <header class="dashboard-header">
                 <div>
                     <h2>Top Artists</h2>
-                    <p>Your most played artists</p>
+                    <p>Your most listened artists</p>
                 </div>
 
-                <span id="syncStatus"></span>
+                <select id="timeRangeSelect">
+                    <option value="all">All Time</option>
+                    <option value="1month">Last 1 Month</option>
+                    <option value="6months">Last 6 Months</option>
+                    <option value="12months">Last 12 Months</option>
+                </select>
 
-                
+                <span id="syncStatus"></span>
             </header>
 
 

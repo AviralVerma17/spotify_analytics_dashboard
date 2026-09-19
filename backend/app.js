@@ -25,43 +25,61 @@ app.get("/api/test", (req, res) => {
 
 
 app.get("/api/user-summary", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
     }
 
-    const sql = `SELECT
-users.username,
-count(*) as total_plays,
-count(distinct listening_history.track_id) as total_songs,
-count(distinct tracks.artist_id) as total_artists,
-min(listening_history.played_at) as first_played,
-max(listening_history.played_at) as last_played
-from listening_history
-join users
-on listening_history.user_id=users.user_id
-join tracks
-on listening_history.track_id=tracks.track_id
-join artists
-on tracks.artist_id=artists.artist_id
-where users.user_id=?
-group by 
-users.user_id, users.username
-order by total_plays desc;`;
+    let dateCondition = "";
 
-    const [results] = await db.query(sql, [userId]);
+    if (timeRange === "1month") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        SELECT
+            users.username,
+            COUNT(*) AS total_plays,
+            COUNT(DISTINCT listening_history.track_id) AS total_songs,
+            COUNT(DISTINCT tracks.artist_id) AS total_artists,
+            MIN(listening_history.played_at) AS first_played,
+            MAX(listening_history.played_at) AS last_played
+        FROM listening_history
+        JOIN users
+            ON listening_history.user_id = users.user_id
+        JOIN tracks
+            ON listening_history.track_id = tracks.track_id
+        JOIN artists
+            ON tracks.artist_id = artists.artist_id
+        WHERE users.user_id = ?
+        ${dateCondition}
+        GROUP BY
+            users.user_id,
+            users.username
+        ORDER BY total_plays DESC;
+    `;
+
+    const [results] =
+        await db.query(sql, [userId]);
+
     res.json(results);
-}));
-
-
-app.get("/api/users", asyncHandler(async (req, res) => {
-
-    const [results] = await db.query("SELECT * FROM users");
-
-    res.json(results);
-
 }));
 app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
 
@@ -109,60 +127,101 @@ app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
 }));
 
 app.get("/api/top-songs", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
     }
-    const sql = `with song_plays as(
-    select
-    users.user_id,
-    users.username,
-    tracks.track_id,
-    tracks.track_name,
-    artists.artist_name,
-    count(*) as total_plays
-    from listening_history
-    join users
-    on listening_history.user_id=users.user_id
-    join tracks
-    on listening_history.track_id=tracks.track_id
-    join artists
-    on tracks.artist_id=artists.artist_id
-    WHERE users.user_id = ?
-    group by
-    users.user_id,
-    users.username,
-    tracks.track_id,
-    tracks.track_name,
-    artists.artist_name
-),
 
-ranked_songs as (
-    select
-    username,
-    track_name,
-    artist_name,
-    total_plays,
-    row_number() over(
-        partition by user_id
-        order by total_plays desc
-    ) as song_rank
-    from song_plays
-)
+    let dateCondition = "";
 
-select
-username,
-track_name,
-artist_name,
-total_plays,
-song_rank
-from ranked_songs
-where song_rank<=3
-order by username, song_rank;`;
+    if (timeRange === "1month") {
 
-    const [results] = await db.query(sql, [userId]);
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        WITH song_plays AS (
+
+            SELECT
+                users.user_id,
+                users.username,
+                tracks.track_id,
+                tracks.track_name,
+                artists.artist_name,
+                COUNT(*) AS total_plays
+
+            FROM listening_history
+
+            JOIN users
+                ON listening_history.user_id = users.user_id
+
+            JOIN tracks
+                ON listening_history.track_id = tracks.track_id
+
+            JOIN artists
+                ON tracks.artist_id = artists.artist_id
+
+            WHERE users.user_id = ?
+            ${dateCondition}
+
+            GROUP BY
+                users.user_id,
+                users.username,
+                tracks.track_id,
+                tracks.track_name,
+                artists.artist_name
+        ),
+
+        ranked_songs AS (
+
+            SELECT
+                user_id,
+                username,
+                track_name,
+                artist_name,
+                total_plays,
+
+                ROW_NUMBER() OVER (
+                    PARTITION BY user_id
+                    ORDER BY total_plays DESC
+                ) AS song_rank
+
+            FROM song_plays
+        )
+
+        SELECT
+            username,
+            track_name,
+            artist_name,
+            total_plays,
+            song_rank
+
+        FROM ranked_songs
+
+        WHERE song_rank <= 3
+
+        ORDER BY username, song_rank;
+    `;
+
+    const [results] =
+        await db.query(sql, [userId]);
+
     res.json(results);
 }));
 
@@ -184,11 +243,25 @@ app.get("/api/db-check", asyncHandler(async (req, res) => {
 app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
 
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
+    }
+
+    let dateCondition = "";
+
+    if (timeRange === "1month") {
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+    } else if (timeRange === "6months") {
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+    } else if (timeRange === "12months") {
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
     }
 
     const sql = `
@@ -202,6 +275,7 @@ app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
         JOIN artists
             ON tracks.artist_id = artists.artist_id
         WHERE listening_history.user_id = ?
+        ${dateCondition}
         GROUP BY
             tracks.track_id,
             tracks.track_name,
@@ -218,25 +292,57 @@ app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
 app.get("/api/top-artists", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
     }
 
-    const sql = `SELECT
-    artists.artist_name,
-    COUNT(*) AS total_plays
-    FROM listening_history
-    JOIN users
-        ON listening_history.user_id = users.user_id
-    JOIN tracks
-        ON listening_history.track_id = tracks.track_id
-    JOIN artists
-        ON tracks.artist_id = artists.artist_id
-    WHERE users.user_id = ?
-    GROUP BY artists.artist_id, artists.artist_name
-    ORDER BY total_plays DESC;`;
+    let dateCondition = "";
+
+    if (timeRange === "1month") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        SELECT
+            artists.artist_name,
+            COUNT(*) AS total_plays
+
+        FROM listening_history
+
+        JOIN users
+            ON listening_history.user_id = users.user_id
+
+        JOIN tracks
+            ON listening_history.track_id = tracks.track_id
+
+        JOIN artists
+            ON tracks.artist_id = artists.artist_id
+
+        WHERE users.user_id = ?
+        ${dateCondition}
+
+        GROUP BY
+            artists.artist_id,
+            artists.artist_name
+
+        ORDER BY total_plays DESC;
+    `;
 
     const [user] = await db.query(
         "SELECT user_id FROM users WHERE user_id = ?",
@@ -249,150 +355,329 @@ app.get("/api/top-artists", asyncHandler(async (req, res) => {
         });
     }
 
-    const [results] = await db.query(sql, [userId]);
+    const [results] =
+        await db.query(sql, [userId]);
 
     res.json(results);
 }));
 
 
 app.get("/api/listening-hours", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
     }
-    const sql = `select
-    hour(listening_history.played_at) as listening_hour,
-    count(*) as total_plays
-    from listening_history
-    where listening_history.user_id=?
-    group by hour(listening_history.played_at)
-    order by listening_hour asc;`;
+
+    let dateCondition = "";
+
+    if (timeRange === "1month") {
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+    } else if (timeRange === "6months") {
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+    } else if (timeRange === "12months") {
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        SELECT
+            HOUR(listening_history.played_at) AS listening_hour,
+            COUNT(*) AS total_plays
+        FROM listening_history
+        WHERE listening_history.user_id = ?
+        ${dateCondition}
+        GROUP BY HOUR(listening_history.played_at)
+        ORDER BY listening_hour ASC;
+    `;
 
     const [results] = await db.query(sql, [userId]);
+
     res.json(results);
 }));
 
 app.get("/api/monthly-trends", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
     }
-    const sql = `select
-    year(listening_history.played_at) as year,
-    month(listening_history.played_at) as month,
-    count(*) as total_plays
-    from listening_history
-    where listening_history.user_id=?
-    group by year(listening_history.played_at), month(listening_history.played_at)
-    order by year, month;`
 
-    const [results] = await db.query(sql, [userId]);
+    let dateCondition = "";
+
+    if (timeRange === "1month") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        SELECT
+            YEAR(listening_history.played_at) AS year,
+            MONTH(listening_history.played_at) AS month,
+            COUNT(*) AS total_plays
+
+        FROM listening_history
+
+        WHERE listening_history.user_id = ?
+        ${dateCondition}
+
+        GROUP BY
+            YEAR(listening_history.played_at),
+            MONTH(listening_history.played_at)
+
+        ORDER BY
+            year,
+            month;
+    `;
+
+    const [results] =
+        await db.query(sql, [userId]);
+
     res.json(results);
 }));
 
 app.get("/api/listening-concentration", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user id is required"
         });
     }
-    const sql = `WITH song_plays AS (
-        SELECT
-            tracks.track_id,
-            tracks.track_name,
-            COUNT(*) AS total_plays
-        FROM listening_history
-        JOIN tracks
-            ON listening_history.track_id = tracks.track_id
-        WHERE listening_history.user_id = ?
-        GROUP BY
-            tracks.track_id,
-            tracks.track_name
-    ),
 
-    ranked_songs AS (
-        SELECT
-            track_name,
-            total_plays,
-            ROW_NUMBER() OVER (
-                ORDER BY total_plays DESC
-            ) AS song_rank
-        FROM song_plays
-    ),
+    let dateCondition = "";
 
-    user_total AS (
-        SELECT
-            COUNT(*) AS user_total_plays
-        FROM listening_history
-        WHERE user_id = ?
-    )
+    if (timeRange === "1month") {
 
-    SELECT
-        ranked_songs.track_name AS top_song,
-        ranked_songs.total_plays AS top_song_plays,
-        user_total.user_total_plays,
-        ROUND(
-            ranked_songs.total_plays * 100.0 / user_total.user_total_plays,2
-        ) AS percent_top_song
-    FROM ranked_songs
-    JOIN user_total
-    WHERE ranked_songs.song_rank = 1;`;
-    const [results] = await db.query(sql, [userId, userId]);
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        WITH song_plays AS (
+
+            SELECT
+                tracks.track_id,
+                tracks.track_name,
+                COUNT(*) AS total_plays
+
+            FROM listening_history
+
+            JOIN tracks
+                ON listening_history.track_id = tracks.track_id
+
+            WHERE listening_history.user_id = ?
+            ${dateCondition}
+
+            GROUP BY
+                tracks.track_id,
+                tracks.track_name
+        ),
+
+        ranked_songs AS (
+
+            SELECT
+                track_name,
+                total_plays,
+
+                ROW_NUMBER() OVER (
+                    ORDER BY total_plays DESC
+                ) AS song_rank
+
+            FROM song_plays
+        ),
+
+        user_total AS (
+
+            SELECT
+                COUNT(*) AS user_total_plays
+
+            FROM listening_history
+
+            WHERE user_id = ?
+            ${dateCondition}
+        )
+
+        SELECT
+            ranked_songs.track_name AS top_song,
+            ranked_songs.total_plays AS top_song_plays,
+            user_total.user_total_plays,
+
+            ROUND(
+                ranked_songs.total_plays * 100.0 /
+                user_total.user_total_plays,
+                2
+            ) AS percent_top_song
+
+        FROM ranked_songs
+
+        JOIN user_total
+
+        WHERE ranked_songs.song_rank = 1;
+    `;
+
+    const [results] =
+        await db.query(
+            sql,
+            [userId, userId]
+        );
+
     res.json(results);
 }));
 
 app.get("/api/listening-repetition", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
             error: "user_id is required"
         });
     }
-    const sql = `SELECT
-        users.username,
-        COUNT(*) AS total_plays,
-        COUNT(DISTINCT listening_history.track_id) AS unique_songs,
-        ROUND(
-            COUNT(*) * 1.0 / COUNT(DISTINCT listening_history.track_id),2
-        ) AS avg_plays
-    FROM listening_history
-    JOIN users
-        ON users.user_id = listening_history.user_id
-    WHERE users.user_id = ?
-    GROUP BY users.username, users.user_id;`;
-    const [results] = await db.query(sql, [userId]);
+
+    let dateCondition = "";
+
+    if (timeRange === "1month") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        SELECT
+            users.username,
+            COUNT(*) AS total_plays,
+            COUNT(DISTINCT listening_history.track_id) AS unique_songs,
+            ROUND(
+                COUNT(*) * 1.0 /
+                COUNT(DISTINCT listening_history.track_id),
+                2
+            ) AS avg_plays
+
+        FROM listening_history
+
+        JOIN users
+            ON users.user_id = listening_history.user_id
+
+        WHERE users.user_id = ?
+        ${dateCondition}
+
+        GROUP BY
+            users.username,
+            users.user_id;
+    `;
+
+    const [results] =
+        await db.query(sql, [userId]);
+
     res.json(results);
 }));
 
 app.get("/api/time-of-day", asyncHandler(async (req, res) => {
+
     const userId = req.query.user_id;
+    const timeRange = req.query.time_range || "all";
+
     if (!userId) {
         return res.status(400).json({
-            error: "user  id is required"
+            error: "user id is required"
         });
     }
-    const sql =
-        `SELECT
-        CASE
-            WHEN HOUR(listening_history.played_at) BETWEEN 5 AND 11
-                THEN 'Morning'
-            WHEN HOUR(listening_history.played_at) BETWEEN 12 AND 16
-                THEN 'Afternoon'
-            WHEN HOUR(listening_history.played_at) BETWEEN 17 AND 20
-                THEN 'Evening'
-            ELSE 'Night'
-        END AS time_of_day,
-        COUNT(*) AS total_plays
-    FROM listening_history
-    WHERE listening_history.user_id = ?
-    GROUP BY time_of_day
-    ORDER BY total_plays DESC, time_of_day ASC;`;
-    const [results] = await db.query(sql, [userId]);
+
+    let dateCondition = "";
+
+    if (timeRange === "1month") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+
+    } else if (timeRange === "6months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+
+    } else if (timeRange === "12months") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    }
+
+    const sql = `
+        SELECT
+            CASE
+                WHEN HOUR(listening_history.played_at) BETWEEN 5 AND 11
+                    THEN 'Morning'
+
+                WHEN HOUR(listening_history.played_at) BETWEEN 12 AND 16
+                    THEN 'Afternoon'
+
+                WHEN HOUR(listening_history.played_at) BETWEEN 17 AND 20
+                    THEN 'Evening'
+
+                ELSE 'Night'
+            END AS time_of_day,
+
+            COUNT(*) AS total_plays
+
+        FROM listening_history
+
+        WHERE listening_history.user_id = ?
+        ${dateCondition}
+
+        GROUP BY time_of_day
+
+        ORDER BY
+            total_plays DESC,
+            time_of_day ASC;
+    `;
+
+    const [results] =
+        await db.query(sql, [userId]);
+
     res.json(results);
 }));
 

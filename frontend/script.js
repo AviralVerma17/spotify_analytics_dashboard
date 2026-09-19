@@ -1,5 +1,8 @@
 let listeningTrendChart = null;
 let timeOfDayChart = null;
+function getTimeRange() {
+    return localStorage.getItem("timeRange") || "all";
+}
 
 
 window.addEventListener("userSelected", async (event) => {
@@ -9,8 +12,10 @@ window.addEventListener("userSelected", async (event) => {
         return;
     }
 
+    const timeRange = getTimeRange();
+
     const response = await fetch(
-        `/api/user-summary?user_id=${userId}`
+        `/api/user-summary?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!response.ok) {
@@ -31,7 +36,7 @@ window.addEventListener("userSelected", async (event) => {
     document.getElementById("uniqueArtists").textContent = user.total_artists;
 
     const topSongsResponse = await fetch(
-        `/api/top-songs?user_id=${userId}`
+        `/api/top-songs?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!topSongsResponse.ok) {
@@ -69,7 +74,7 @@ window.addEventListener("userSelected", async (event) => {
         topSongsContainer.appendChild(songElement);
     });
     const topArtistsResponse = await fetch(
-        `/api/top-artists?user_id=${userId}`
+        `/api/top-artists?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!topArtistsResponse.ok) {
@@ -100,7 +105,7 @@ window.addEventListener("userSelected", async (event) => {
         topArtistsContainer.appendChild(artistElement);
     });
     const trendsResponse = await fetch(
-        `/api/monthly-trends?user_id=${userId}`
+        `/api/monthly-trends?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!trendsResponse.ok) {
@@ -183,7 +188,7 @@ window.addEventListener("userSelected", async (event) => {
         }
     });
     const timeResponse = await fetch(
-        `/api/time-of-day?user_id=${userId}`
+        `/api/time-of-day?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!timeResponse.ok) {
@@ -285,7 +290,7 @@ window.addEventListener("userSelected", async (event) => {
         repetitionData.avg_plays;
 
     const concentrationResponse = await fetch(
-        `/api/listening-concentration?user_id=${userId}`
+        `/api/listening-concentration?user_id=${userId}&time_range=${timeRange}`
     );
 
     if (!concentrationResponse.ok) {

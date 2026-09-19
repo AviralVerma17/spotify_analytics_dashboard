@@ -1,5 +1,43 @@
 let currentUserId = null;
+let currentTimeRange =
+    localStorage.getItem("timeRange") || "all";
+const timeRangeSelect =
+    document.getElementById("timeRangeSelect");
 
+if (timeRangeSelect) {
+
+    timeRangeSelect.value =
+        currentTimeRange;
+
+   timeRangeSelect.addEventListener(
+    "change",
+    () => {
+
+        currentTimeRange =
+            timeRangeSelect.value;
+
+        localStorage.setItem(
+            "timeRange",
+            currentTimeRange
+        );
+
+        window.dispatchEvent(
+            new CustomEvent("timeRangeChanged", {
+                detail: currentTimeRange
+            })
+        );
+
+        if (currentUserId) {
+
+            window.dispatchEvent(
+                new CustomEvent("userSelected", {
+                    detail: currentUserId
+                })
+            );
+        }
+    }
+);
+}
 
 async function loadSpotifyUser() {
 

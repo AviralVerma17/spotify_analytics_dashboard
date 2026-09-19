@@ -7,15 +7,18 @@ window.addEventListener("userSelected", async (event) => {
     const userId = event.detail;
 
     if (!userId) {
-        topArtistsContainer.innerHTML =
-            "Select a user to view your top artists.";
-        return;
-    }
+    topArtistsContainer.innerHTML =
+        "Please log in with Spotify to view your top artists.";
+    return;
+}
 
 
-    const response = await fetch(
-        `/api/top-artists?user_id=${userId}`
-    );
+    const timeRange =
+    localStorage.getItem("timeRange") || "all";
+
+const response = await fetch(
+    `/api/top-artists?user_id=${userId}&time_range=${timeRange}`
+);
 
     if (!response.ok) {
         console.error("Failed to load top artists");

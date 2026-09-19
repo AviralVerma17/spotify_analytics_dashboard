@@ -8,14 +8,17 @@ window.addEventListener("userSelected", async (event) => {
     const userId = event.detail;
 
     if (!userId) {
-        topSongsContainer.innerHTML =
-            "Select a user to view your top songs.";
-        return;
-    }
+    topSongsContainer.innerHTML =
+        "Please log in with Spotify to view your top songs.";
+    return;
+}
 
-    const response = await fetch(
-        `/api/all-top-songs?user_id=${userId}`
-    );
+    const timeRange =
+    localStorage.getItem("timeRange") || "all";
+
+const response = await fetch(
+    `/api/all-top-songs?user_id=${userId}&time_range=${timeRange}`
+);
 
     if (!response.ok) {
         console.error("Failed to load top songs");
