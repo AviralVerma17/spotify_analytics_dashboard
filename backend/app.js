@@ -3,12 +3,13 @@ const path = require("path");
 const express = require("express");
 const asyncHandler = require("./asyncHandler");
 const errorHandler = require("./errorHandler");
+
 const app = express();
 
-app.use(express.json({limit:"1mb"}));
-
+app.use(express.json({ limit: "1mb" }));
 
 app.use(express.static(path.join(__dirname, "../frontend")));
+
 
 app.get("/auth/callback", (req, res) => {
     res.sendFile(
@@ -37,20 +38,20 @@ app.get("/api/user-summary", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -81,6 +82,8 @@ app.get("/api/user-summary", asyncHandler(async (req, res) => {
 
     res.json(results);
 }));
+
+
 app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
 
     const spotifyId = req.query.spotify_id;
@@ -126,6 +129,7 @@ app.get("/api/user-by-spotify", asyncHandler(async (req, res) => {
     res.json(newUser[0]);
 }));
 
+
 app.get("/api/top-songs", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -139,20 +143,20 @@ app.get("/api/top-songs", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -225,6 +229,7 @@ app.get("/api/top-songs", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/db-check", asyncHandler(async (req, res) => {
 
     const [results] = await db.query(`
@@ -240,6 +245,7 @@ app.get("/api/db-check", asyncHandler(async (req, res) => {
     res.json(results[0]);
 }));
 
+
 app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -253,15 +259,20 @@ app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
+
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
-    } else if (timeRange === "6months") {
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+
+    } else if (timeRange === "2weeks") {
+
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-    } else if (timeRange === "12months") {
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -289,6 +300,7 @@ app.get("/api/all-top-songs", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/top-artists", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -302,20 +314,20 @@ app.get("/api/top-artists", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -375,15 +387,20 @@ app.get("/api/listening-hours", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
+
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
-    } else if (timeRange === "6months") {
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+
+    } else if (timeRange === "2weeks") {
+
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-    } else if (timeRange === "12months") {
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -402,6 +419,7 @@ app.get("/api/listening-hours", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/monthly-trends", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -415,20 +433,20 @@ app.get("/api/monthly-trends", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -457,6 +475,7 @@ app.get("/api/monthly-trends", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/listening-concentration", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -470,20 +489,20 @@ app.get("/api/listening-concentration", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -558,6 +577,7 @@ app.get("/api/listening-concentration", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/listening-repetition", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -571,20 +591,20 @@ app.get("/api/listening-repetition", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -617,6 +637,7 @@ app.get("/api/listening-repetition", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/time-of-day", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -630,20 +651,20 @@ app.get("/api/time-of-day", asyncHandler(async (req, res) => {
 
     let dateCondition = "";
 
-    if (timeRange === "1month") {
+    if (timeRange === "1week") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-    } else if (timeRange === "6months") {
-
-        dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-
-    } else if (timeRange === "12months") {
+    } else if (timeRange === "2weeks") {
 
         dateCondition =
-            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)";
+
+    } else if (timeRange === "4weeks") {
+
+        dateCondition =
+            "AND listening_history.played_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)";
     }
 
     const sql = `
@@ -681,6 +702,7 @@ app.get("/api/time-of-day", asyncHandler(async (req, res) => {
     res.json(results);
 }));
 
+
 app.get("/api/last-listening", asyncHandler(async (req, res) => {
 
     const userId = req.query.user_id;
@@ -703,6 +725,7 @@ app.get("/api/last-listening", asyncHandler(async (req, res) => {
     });
 
 }));
+
 
 app.post("/api/sync-recently-played", asyncHandler(async (req, res) => {
 
@@ -821,7 +844,9 @@ app.post("/api/sync-recently-played", asyncHandler(async (req, res) => {
     }
 }));
 
+
 app.use(errorHandler);
+
 app.listen(3000, () => {
-    console.log("server running on http://localhost:3000")
+    console.log("server running on http://localhost:3000");
 });
