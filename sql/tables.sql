@@ -1,17 +1,17 @@
 create table artists(
     artist_id int primary key AUTO_INCREMENT,
-    artist_name varchar(50) not null
+    artist_name varchar(250) not null
 );
 create table tracks(
     track_id int primary key auto_increment,
-    track_name varchar(75) not null,
+    track_name varchar(250) not null,
     artist_id int not NULL, 
     foreign key (artist_id) 
     references artists(artist_id)
 );
 create table users(
     user_id int primary key AUTO_INCREMENT,
-    username varchar(100) not null
+    username varchar(250) not null
 );
 create table listening_history(
     listening_id int primary key auto_increment,

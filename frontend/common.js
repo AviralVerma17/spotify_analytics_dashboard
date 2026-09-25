@@ -1,6 +1,24 @@
 let currentUserId = null;
+
 let currentTimeRange =
     localStorage.getItem("timeRange") || "all";
+
+const validTimeRanges = [
+    "all",
+    "1week",
+    "2weeks",
+    "4weeks"
+];
+
+if (!validTimeRanges.includes(currentTimeRange)) {
+
+    currentTimeRange = "all";
+
+    localStorage.setItem(
+        "timeRange",
+        "all"
+    );
+}
 const timeRangeSelect =
     document.getElementById("timeRangeSelect");
 

@@ -219,10 +219,16 @@ const monthlyTrends = await trendsResponse.json();
     const listeningHours = await hoursResponse.json();
     if (listeningHours.length > 0) {
 
-        const peakHour = listeningHours[0];
+       const peakHour = listeningHours.reduce(
+    (max, hour) =>
+        Number(hour.total_plays) > Number(max.total_plays)
+            ? hour
+            : max,
+    listeningHours[0]
+);
 
-        document.getElementById("peakHour").textContent =
-            `${peakHour.listening_hour}:00`;
+document.getElementById("peakHour").textContent =
+    `${peakHour.listening_hour}:00`;
 
     }
 
