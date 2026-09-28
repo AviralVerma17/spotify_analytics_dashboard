@@ -154,6 +154,16 @@ Measures how much of a user's total listening activity is represented by their m
 
 Uses SQL ranking techniques to determine top songs and artists.
 
+### Time Range Filters
+
+The dashboard supports four listening-data time ranges:
+
+- **All Time** — displays all available listening history.
+- **Last 1 Week** — displays listening activity from the previous 7 days.
+- **Last 2 Weeks** — displays listening activity from the previous 14 days.
+- **Last 4 Weeks** — displays listening activity from the previous 28 days.
+
+The selected time range is applied across the dashboard's listening analytics, including top songs, top artists, listening patterns, and related charts.
 ---
 
 ## 🔌 Backend API
